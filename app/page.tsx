@@ -27,7 +27,7 @@ const TimelineDisplay = async () => {
   return (
     <>
       {
-        _.reverse(timeline.map((item, index) => (
+        timeline.map((item, index) => (
           <div key={index} className="mb-12 relative pl-8 border-l border-gray-800">
             <RevealOnScroll>
               {item.image && (
@@ -50,7 +50,7 @@ const TimelineDisplay = async () => {
               {item.projects && item.projects.map(project => <TimelineProject project={project} key={project.id} />)}
             </RevealOnScroll>
           </div>
-        )))
+        ))
       }
     </>
   )
