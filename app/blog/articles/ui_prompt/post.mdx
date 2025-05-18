@@ -1,0 +1,192 @@
+---
+title: Async UI Prompts
+date: 2025-05-18T21:38:55.297Z
+preview: The powerful React pattern that lets your UI ask questions
+image: "./Gemini_Generated_Image_cowdvfcowdvfcowd.png"
+tags:
+  - React
+  - Frontend
+---
+
+# ❗The Problem
+
+There’s a subtle but powerful React pattern that unlocks a more intuitive user experience: letting the UI ask questions. 🤔
+
+React is declarative. We render the UI based on state. But sometimes, we need to render a *question*—we need to pause and ask the user for input or confirmation before continuing. That’s where this pattern shines. ✋
+
+Let’s say we have a component that deletes an item:
+
+```tsx
+<button onClick={() => deleteItem(item.id)}>Delete</button>
+```
+
+But wait—what if the user didn’t mean to click that? We’d need a confirmation dialog, so we add one. Many of us, when building in React, opt for custom modals. But that typically means adding state directly in the current component:
+
+```tsx
+const [isModalShown, setIsModalShown] = useState(false);
+const handleDelete = () => setIsModalShown(true);
+const handleConfirm = async () => {
+  await deleteItem(item.id);
+  setIsModalShown(false);
+};
+```
+
+Now we have conditional rendering for the modal, handlers for confirming or canceling, and extra state and props cluttering up the logic. The more components we do this in, the more boilerplate we end up duplicating. 😩
+
+With vanilla HTML, we could just call `window.confirm` and get a synchronous answer. Wouldn't it be nice if we could do something similar in React—just `await` a modal like a function call?
+
+# 💡 Declarative Prompts: Letting the UI Ask
+
+Imagine being able to *await* a modal like we would a function call—clean, simple, and intuitive. ✨
+
+```tsx
+const confirmed = await confirm({ message: 'Are you sure?' });
+if (confirmed) {
+  await deleteItem(item.id);
+}
+```
+
+How would this work?
+
+This is the core idea behind **"async prompts"**—we render a modal declaratively, but imperatively `await` a response. Here’s a simplified example:
+
+## 🏗️ Step 1: Build a Local Prompt Hook
+
+Instead of using context, we can keep everything self-contained by building a hook that manages local modal state and returns a promise. 🛌
+
+```tsx
+// useConfirmationDialog.tsx
+export const useConfirmationDialog = () => {
+  const [resolver, setResolver] = useState<((confirmed: boolean) => void) | null>(null);
+  const hasPending = !!resolver;
+
+  const [title, setTitle] = useState('');
+  const [bodyText, setBodyText] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const getUserConfirmation = (args: { title: string; bodyText: string }) =>
+    new Promise<boolean>((resolve) => {
+      setTitle(args.title);
+      setBodyText(args.bodyText);
+      setResolver(() => resolve);
+    });
+
+  const closeDialog = () => {
+    setLoading(false);
+    setResolver(null);
+  };
+
+  const onConfirm = () => {
+    setLoading(true);
+    resolver?.(true);
+    closeDialog();
+  };
+
+  const onCancel = () => {
+    setLoading(true);
+    resolver?.(false);
+    closeDialog();
+  };
+
+  return {
+    getUserConfirmation,
+    confirmationDialog: (
+      <ConfirmationModal
+        open={hasPending}
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+        title={title}
+        loading={loading}
+      >
+        {bodyText}
+      </ConfirmationModal>
+    ),
+  };
+};
+```
+
+Now our UI can await user input without cluttering the component with modal state. 🚀
+
+## 💻 Step 2: Use It Anywhere
+
+```tsx
+const ConfirmButton = () => {
+  const { getUserConfirmation, confirmationDialog } = useConfirmationDialog();
+
+  const handleClick = async () => {
+    const confirmed = await getUserConfirmation({
+      title: 'Delete item?',
+      bodyText: 'Are you sure you want to delete this item?',
+    });
+    if (confirmed) {
+      // Proceed
+    }
+  };
+
+  return (
+    <>
+      <button onClick={handleClick}>Delete</button>
+      {confirmationDialog}
+    </>
+  );
+};
+```
+
+This lets us declaratively render the dialog when needed and keep imperative logic readable. 🧵
+
+# 🌐 Beyond Yes/No
+
+This pattern isn’t just for simple confirmations. We can build prompts for different types of questions:
+
+* **Yes/No**: "Do you want to continue?"
+* **Multiple Choice**: "What’s your favorite food?" with options like Pizza, Sushi, Tacos.
+* **Text Input**: "What should we call this project?"
+* Anything else really...
+
+All of these can follow the same structure:
+
+1. Start a Promise.
+2. Render a modal.
+3. Resolve the Promise with the user’s answer.
+
+The UI gets to *ask*, and our logic gets to *wait* for an answer. ⏳
+
+There are many ways to abstract this for more generalization. On example could be to provide an interface
+to ask different `type`s of questions, as follow:
+
+```tsx
+const answer = await prompt({
+  type: 'multipleChoice',
+  message: 'What’s your favorite food?',
+  options: ['Pizza', 'Sushi', 'Tacos'],
+});
+```
+
+Or:
+
+```tsx
+const name = await prompt({
+  type: 'text',
+  message: 'What should we name this project?',
+  placeholder: 'Enter project name...',
+});
+```
+
+Each variation maps to a reusable, typed modal component that knows how to ask that kind of question and resolve the correct shape of answer. 🧪
+
+This is generally useful for anytime we need to open up a temporary prompt, no matter how simple or complex, to
+get a user input, then let the main component handle the result of the prompt. 🧠
+
+# 🧼 Why This Pattern Matters
+
+This technique is a declarative wrapper over imperative logic. We get to write clean, sequential logic (`if (confirmed)`) while still keeping modal logic centralized and decoupled. 🔄
+
+It’s testable, composable, and scales well. It’s not limited to confirmation modals—we can extend this to file pickers, form modals, password prompts, and more. 🔑
+
+# 🎁 Wrap-Up
+
+**Async prompts** flip the script: instead of our UI reacting to state changes, it gets to ask questions—and *wait* for answers.
+
+We keep our components clean. Our logic stays linear. No tangled modal state or boilerplate everywhere. Just clear, declarative questions rendered at the right time, with answers that resolve like magic.
+
+If you’ve ever wished `window.confirm` worked like a React component, this pattern is for you.
