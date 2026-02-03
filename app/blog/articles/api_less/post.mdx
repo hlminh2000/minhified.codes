@@ -1,0 +1,71 @@
+---
+title: API-less Web Apps and Fullstack Development
+date: Tue Jan 07 2025 14:02:25 GMT-0500 (Eastern Standard Time)
+preview: |
+  For the majority of my time building web apps, the status quo has been a frontend talking 
+  to a backend through some kind of custom web APIs. This might be coming to an end, and I'm 
+  happy to see it go.
+image: "./api_less.jpeg"
+---
+
+import Image from 'next/image'
+
+# TLDR,
+Since we now have the tech to build SPAs without having to build web APIs, there'll be a lot
+more web apps built without this. For web dev, I'm speculating the following changes:
+
+1. Most web developers will be full-stack now
+1. APIs will only make sense when there's a need for:
+    1. Supporting multiple-clients (web, mobile, etc...)
+    1. The API itself being a product
+1. Some challenges:
+    1. Security - without a standard around 
+
+# Introduction
+Single Page Apps (SPAs) have been the norm for a while now, and they are most commonly powered
+by back-end APIs that allow them to read and write data without reloading entirely. While this
+is not the only reason to build a server-side API, it is more often than not, the only reason 
+why many of them exists.
+
+Today we have have more options that allow the browser to call backend functions without having
+to build a web API, at least I'm aware of:
+  - [**tRPC**](https://trpc.io/)
+  - [**Laraval Livewire**](https://laravel-livewire.com/)
+  - **React Server Component** and **Server Actions in Next.js**
+
+Of course underneath the hood, the browser still has to communicate with a backend over AJAX calls,
+however we simply won't be hand-coding web APIs anywhere nearly as often. For web development
+overall, there'll be some implications.
+
+***Ackowledgement:** I am predominently a JS developer, so my opinion is strongly skewed by the
+developments in JS land, particularly with React and Next.js. I recognize that this is still in
+the bleeding edge, and if these tools do take over, it won't be tomorrow - I myself am continuing
+to work on APIs that are built specifically for the browser to consume.*
+
+## 1. Most devs will be full-stack now
+Gone are the days when *"Front end developer"* were working on HTML, CSS and a sprinkle of JS for
+novice interactivity. Since I got into the industry almost 10 years ago, the frontend has been 
+ever growing in complexity.
+
+Before Node.js, the skillset required to develop the frontend of a webapp and that of the backend 
+system was significantly different. Although languages were by no means the only meaningful 
+difference, it's a major barrier to entry for a frontend developer to get exposure to learn about
+the backend, and vice versa. You can't really be efficient at gaining hands-on experience building 
+an API without first learning Ruby, or PhP, etc... as a frontend dev.
+
+More and more logic got pushed to the frontend, and over the years, we've seen the rise and fall
+of countless state management libraries and data fetching systems that all tried to abstract
+away the process of reading and writing data to the database from the browser (Redux, saga, thunk,
+GraphQL, etc...). The dream was: if only the browser could call those backend functions directly,
+then we can ship features without having to jump through all these hoops.
+
+Of course, in practice, you would never be accessing the DB from the browser directly - for obvious
+security reasons -, this dream is for the most part, here already. 
+
+## 2. Web APIs will be less common
+No we will still be building Web APIs (whether it be REST, GraphQL or RPC etc...), but they will
+only make sense for specific situations.
+
+## 3. Some challenges:
+
+# Conclusion
